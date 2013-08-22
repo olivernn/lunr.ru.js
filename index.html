@@ -1,0 +1,53 @@
+<script src="/lunr.js"></script>
+<script src="/lunr.ru.js"></script>
+
+<script>
+  // some russian documents…
+  var docs = [{
+    "id"    : "http://dreamand.me/ru/emerald/developer/s",
+    "title"   : "Новое действие",
+    "content" : "Дествие это то что сработает после успешной активации...."
+    },{
+    "id"    : "http://dreamand.me/ru/cobalt/optimize-links",
+    "title"   : "Оптимизация ссылок",
+    "content" : "Очень часто получается так, что URLы...."
+  }]
+
+  // monkey patching the existing tokenizr
+  // this will be fixed in an upcoming release of lunr
+  lunr.tokenizer = function (str) {
+    if (!str) return []
+    if (Array.isArray(str)) return str.map(function (t) { return t.toLowerCase() })
+
+    var str = str.replace(/^\s+/, '')
+
+    for (var i = str.length - 1; i >= 0; i--) {
+      if (/\S/.test(str.charAt(i))) {
+        str = str.substring(0, i + 1)
+        break
+      }
+    }
+
+    return str
+      .split(/\s+/)
+      .map(function (token) {
+        return token.toLowerCase()
+      })
+  }
+
+  // setting up the index
+  var idx = lunr(function () {
+    this.field('title')
+    this.field('content')
+  })
+
+  // using the russian language extension
+  // in future versions of lunr there will be some interface for doing this
+  // but for now this will do.
+  lunr.ru.call(idx)
+
+  // loading the documents into the index
+  docs.forEach(function (doc) { idx.add(doc) })
+
+  // idx.search('Российская')
+</script>
